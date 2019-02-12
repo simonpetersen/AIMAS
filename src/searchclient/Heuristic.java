@@ -1,17 +1,30 @@
 package searchclient;
 
 import java.util.Comparator;
+import java.util.HashMap;
 
 public abstract class Heuristic implements Comparator<State> {
     private int heurist;
     char[][] boxes;
     char[][] goal;
+    HashMap<Character, int[]> dictionary = new HashMap();
+
 
     public Heuristic(State initialState) {
         // Here's a chance to pre-process the static parts of the level.
         boxes = initialState.boxes;
         goal = initialState.goals;
         heurist = 0;
+
+        for(int a = 0; a < goal.length; a++){
+            for (int b = 0; b < goal[a].length; b++){
+                if( goal[a][b] >= 'a' && goal[a][b] <= 'z') {
+                    Character go = goal[a][b];
+                    int[] pos = {a,b};
+                    dictionary.put(go, pos);
+                }
+            }
+        }
 
     }
 
@@ -20,13 +33,9 @@ public abstract class Heuristic implements Comparator<State> {
         for(int i = 0; i < n.boxes.length; i++){
             for(int j = 0; j < n.boxes[i].length; j++){
                 if (boxes[i][j] >= 'A' && boxes[i][j] <= 'Z'){
-                    char ca = boxes[i][j];
-                    for(int a = 0; a < n.boxes.length; a++){
-                        for (int b = 0; b < n.boxes[a].length; b++){
-                            if(Character.toLowerCase(ca) == goal[a][b])
-                                heurist += Math.abs(i - a) + Math.abs(j - b);
-                        }
-                    }
+                    char ca = Character.toLowerCase(boxes[i][j]);
+                    if(dictionary.containsKey(ca))
+                        heurist += Math.abs(i - dictionary.get(ca)[0]) + Math.abs(j - dictionary.get(ca)[1]);
                 }
             }
         }
